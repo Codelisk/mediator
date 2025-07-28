@@ -41,6 +41,8 @@ public class HttpDirectRequestHandler(
         var httpResponse = await httpClient
             .SendAsync(httpRequest, cts.Token)
             .ConfigureAwait(false);
+        
+        context.SetHttp(httpRequest, httpResponse);
 
         await this.WriteDebugIfEnable(httpRequest, httpResponse, cancellationToken).ConfigureAwait(false);
         httpResponse.EnsureSuccessStatusCode();
@@ -77,13 +79,11 @@ public class HttpDirectRequestHandler(
                 var baseUrl = configuration.GetValue<string>("Mediator:Http:Direct:BaseUrl");
                 if (baseUrl != null)
                 {
-                    if (baseUrl.EndsWith("/"))
-                        baseUrl = baseUrl.TrimEnd('/');
-
-                    if (!routeName.StartsWith("/"))
-                        routeName = "/" + routeName;
-                    
-                    url = (baseUrl + routeName);
+                    url = baseUrl.TrimEnd('/');
+                    if (routeName.StartsWith('/'))
+                        url += routeName;
+                    else
+                        url = $"{baseUrl}/{routeName}";
                 }
             }
         } 

@@ -4,12 +4,12 @@ using Microsoft.Extensions.DependencyInjection;
 namespace Shiny.Mediator.Testing;
 
 
-public class MockMediatorContext : IMediatorContext
+public class MockMediatorContext(object message) : IMediatorContext
 {
-    public Guid Id { get; set; }
+    public Guid Id { get; } = Guid.NewGuid();
     public IServiceScope ServiceScope { get; set; }
     public Activity? Activity { get; set; }
-    public object Message { get; set; }
+    public object Message => message;
     public object? MessageHandler { get; set; }
 
     readonly Dictionary<string, object> settableHeaders = new();
@@ -18,9 +18,10 @@ public class MockMediatorContext : IMediatorContext
     public void RemoveHeader(string key) => this.settableHeaders.Remove(key);
     public void ClearHeaders() => this.settableHeaders.Clear();
 
+    public Exception? Exception { get; set; }
     public IMediatorContext? Parent { get; }
     public IReadOnlyList<IMediatorContext> ChildContexts { get; }
-    public DateTimeOffset CreatedAt { get; }
+    public DateTimeOffset CreatedAt { get; } = DateTimeOffset.UtcNow;
     public bool BypassExceptionHandlingEnabled { get; set; }
     public bool BypassMiddlewareEnabled { get; set; }
     public IMediatorContext CreateChild(object? newMessage)
@@ -28,10 +29,7 @@ public class MockMediatorContext : IMediatorContext
         throw new NotImplementedException();
     }
 
-    public Activity? StartActivity(string activityName)
-    {
-        throw new NotImplementedException();
-    }
+    public Activity? StartActivity(string activityName) => null;
 
     public T? TryGetValue<T>(string key)
     {
