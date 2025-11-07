@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Configuration;
+﻿using System.Diagnostics.CodeAnalysis;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Shiny.Mediator.Infrastructure;
 
@@ -19,14 +20,13 @@ public class CachingRequestMiddleware<TRequest, TResult>(
         CancellationToken cancellationToken
     )
     {
-        var cacheKey = contractKeyProvider.GetContractKey(context.Message!);
-        // TODO: ensure wait if key is already being requested, if item was just put in cache, don't force a flush even if one is requested?
-        
         var config = this.GetItemConfig(context, (TRequest)context.Message);
         if (config == null)
             return await next().ConfigureAwait(false);
 
+        var cacheKey = contractKeyProvider.GetContractKey(context.Message!);
         TResult result = default!;
+        
         if (context.HasForceCacheRefresh())
         {
             logger.LogDebug("Cache Forced Refresh - {Request}", context.Message);
@@ -61,6 +61,7 @@ public class CachingRequestMiddleware<TRequest, TResult>(
     }
 
 
+    [UnconditionalSuppressMessage("Trimming", "IL2026", Justification = "GetValue will not be trimmed")]
     protected virtual CacheItemConfig? GetItemConfig(IMediatorContext context, TRequest request)
     {
         // context #1
@@ -79,7 +80,7 @@ public class CachingRequestMiddleware<TRequest, TResult>(
         }
         
         // handler attribute #3
-        var attribute = ((IRequestHandler<TRequest, TResult>)context.MessageHandler).GetHandlerHandleMethodAttribute<TRequest, TResult, CacheAttribute>();
+        var attribute = context.GetHandlerAttribute<CacheAttribute>();
         if (attribute != null)
             return FromSeconds(attribute.AbsoluteExpirationSeconds, attribute.SlidingExpirationSeconds);
 

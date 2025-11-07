@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using System.Text;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
@@ -9,13 +10,14 @@ namespace Shiny.Mediator.Http;
 public class HttpDirectRequestHandler(
     ILogger<HttpDirectRequestHandler> logger,
     ISerializerService serializer,
+    IHttpClientFactory httpClientFactory,
     IEnumerable<IHttpRequestDecorator> decorators,
     IConfiguration? configuration = null
 ) : IRequestHandler<HttpDirectRequest, object?>
 {
-    static readonly HttpClient httpClient = new();
     
     
+    [UnconditionalSuppressMessage("Trimming", "IL2026", Justification = "GetValue will not be trimmed")]
     public async Task<object?> Handle(HttpDirectRequest request, IMediatorContext context, CancellationToken cancellationToken)
     {
         var url = this.GetUrl(request.ConfigNameOrRoute);
@@ -38,6 +40,7 @@ public class HttpDirectRequestHandler(
         if (request.Timeout != null)
             cts.CancelAfter(request.Timeout.Value);
 
+        var httpClient = httpClientFactory.CreateClient();
         var httpResponse = await httpClient
             .SendAsync(httpRequest, cts.Token)
             .ConfigureAwait(false);
@@ -58,6 +61,7 @@ public class HttpDirectRequestHandler(
     }
 
 
+    [UnconditionalSuppressMessage("Trimming", "IL2026", Justification = "GetValue will not be trimmed")]
     string GetUrl(string routeName)
     {
         ArgumentNullException.ThrowIfNullOrWhiteSpace(routeName);
@@ -158,9 +162,13 @@ public class HttpDirectRequestHandler(
         return null;
     }
     
-    
+
+    [UnconditionalSuppressMessage("Trimming", "IL2026", Justification = "GetValue<int> is safe for trimming")]
     async ValueTask WriteDebugIfEnable(HttpRequestMessage request, HttpResponseMessage response, CancellationToken cancellationToken)
     {
+        if (configuration == null)
+            return;
+        
         var debug = configuration.GetValue<bool>("Mediator:Http:Debug");
         if (!debug)
             return;

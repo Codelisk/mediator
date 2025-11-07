@@ -1,10 +1,5 @@
 ﻿using System.Reflection;
-using System.Runtime.CompilerServices;
 using Microsoft.Extensions.Configuration;
-using Polly;
-using Sample.Contracts;
-using Sample.Handlers;
-using Shiny.Mediator.Infrastructure;
 
 namespace Sample;
 
@@ -47,9 +42,9 @@ public static class MauiProgram
                 .GetExecutingAssembly()
                 .GetManifestResourceStream("Sample.appsettings.json")!
         );
-        
-        // builder.Services.AddSingleton<IRequestExecutor, AotRequestExecutor>();
+
         builder.AddShinyMediator(x => x
+            .AddMediatorRegistry()
             .UseMaui()
             .UseBlazor()
             .PreventEventExceptions()
@@ -70,7 +65,6 @@ public static class MauiProgram
             //     y.ExpirationScanFrequency = TimeSpan.FromSeconds(5);
             // })
         );
-        builder.Services.AddDiscoveredMediatorHandlersFromSample();
         
         builder.Services.AddSingleton<AppSqliteConnection>();
         builder.Services.AddMauiBlazorWebView();

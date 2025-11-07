@@ -1,8 +1,16 @@
+using System.Diagnostics.CodeAnalysis;
+
 namespace Shiny.Mediator;
+
 
 public static class TypeExtensions
 {
-    public static bool IsRequestHandler(this Type type) => type
+    /// <summary>
+    /// Checks if current type is a request handler
+    /// </summary>
+    /// <param name="type"></param>
+    /// <returns></returns>
+    public static bool IsRequestHandler([DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.Interfaces)]this Type type) => type
         .GetInterfaces()
         .Any(x => 
             x.IsGenericType && 
@@ -10,14 +18,25 @@ public static class TypeExtensions
         );
     
     
-    public static bool IsCommandHandler(this Type type) => type
+    /// <summary>
+    /// Checks if current type is a command handler
+    /// </summary>
+    /// <param name="type"></param>
+    /// <returns></returns>
+    public static bool IsCommandHandler([DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.Interfaces)] this Type type) => type
         .GetInterfaces()
         .Any(x => 
             x.IsGenericType && 
             x.GetGenericTypeDefinition() == typeof(ICommandHandler<>)
         );
+    
 
-    public static bool IsEventHandler(this Type type) => type
+    /// <summary>
+    /// Checks if current type is an event handler
+    /// </summary>
+    /// <param name="type"></param>
+    /// <returns></returns>
+    public static bool IsEventHandler([DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.Interfaces)] this Type type) => type
         .GetInterfaces()
         .Any(x => 
             x.IsGenericType && 
@@ -25,7 +44,12 @@ public static class TypeExtensions
         );
     
     
-    public static bool IsStreamRequestHandler(this Type type) => type
+    /// <summary>
+    /// Checks if current type is a stream request handler
+    /// </summary>
+    /// <param name="type"></param>
+    /// <returns></returns>
+    public static bool IsStreamRequestHandler([DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.Interfaces)] this Type type) => type
         .GetInterfaces()
         .Any(x => 
             x.IsGenericType && 
@@ -33,7 +57,12 @@ public static class TypeExtensions
         );
     
     
-    public static bool IsCommandContract(this Type type) => type
+    /// <summary>
+    /// Checks if current type is a command message
+    /// </summary>
+    /// <param name="type"></param>
+    /// <returns></returns>
+    public static bool IsCommandContract([DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.Interfaces)] this Type type) => type
         .GetInterfaces()
         .Any(x => 
             x.IsGenericType && 
@@ -41,7 +70,12 @@ public static class TypeExtensions
         );
     
     
-    public static bool IsRequestContract(this Type type) => type
+    /// <summary>
+    /// Checks if current type is a request message
+    /// </summary>
+    /// <param name="type"></param>
+    /// <returns></returns>
+    public static bool IsRequestContract([DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.Interfaces)] this Type type) => type
         .GetInterfaces()
         .Any(x => 
             x.IsGenericType && 
@@ -49,26 +83,15 @@ public static class TypeExtensions
         );
 
 
-    public static bool IsEventContract(this Type type) => type
+    /// <summary>
+    /// Checks if current type is an event message
+    /// </summary>
+    /// <param name="type"></param>
+    /// <returns></returns>
+    public static bool IsEventContract([DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.Interfaces)] this Type type) => type
         .GetInterfaces()
         .Any(x => 
             x.IsGenericType && 
             x.GetGenericTypeDefinition() == typeof(IEvent)
         );
-
-    
-    // public static ContractType? GetContractType(this Type type)
-    // {
-    //     // TODO: cannot be multiple contract types for server
-    //     if (type.IsCommandContract())
-    //         return ContractType.Command;
-    //
-    //     if (type.IsRequestContract())
-    //         return ContractType.Request;
-    //     
-    //     if (type.IsEventContract())
-    //         return ContractType.Event;
-    //     
-    //     return null;
-    // }    
 }

@@ -12,6 +12,8 @@ hardly any effort whatsoever.  Checkout our [Getting Started](https://shinylib.n
 This project is heavily inspired by [MediatR](https://github.com/jbogard/mediatr) with some lesser features that we feel
 were aimed more at server scenarios, while also adding some features we feel benefit apps
 
+We are AOT/Trim friendly in all aspects of how you use Mediator.  We use source generators for almost everything (attribute registration, JSON serialization, dependency injection registration, & more)
+
 ## Samples & Documentation
 - Docs
   - [Main](https://shinylib.net/mediator/)
@@ -22,6 +24,7 @@ were aimed more at server scenarios, while also adding some features we feel ben
 
 ## Features
 - A Mediator for your ALL .NET Apps
+- Fully AOT & Trimming friendly
 - [Request/Response Handling](https://shinylib.net/mediator/requests)
 - [Event Publication](https://shinylib.net/mediator/events)
 - [Async Enumerable Stream Requests](https://shinylib.net/mediator/streams)
@@ -39,6 +42,7 @@ were aimed more at server scenarios, while also adding some features we feel ben
   - [Dapper Extension](https://shinylib.net/mediator/extensions/dapper) for Easy Query Handling
   - [HTTP Extension](https://shinylib.net/mediator/extensions/http) for Easy API handling - OpenAPI Contract Generation takes it even one step further
   - Map contracts directly to handlers with our [ASP.NET Extension](https://shinylib.net/mediator/extensions/aspnet)
+  - Server Sent Events for ASP.NET
 - [Epic Out-of-the-Box Middleware](https://shinylib.net/mediator/middleware/)
   - [Offline Data](https://shinylib.net/mediator/middleware/offline)
   - [Caching](https://shinylib.net/mediator/middleware/caching)
@@ -93,14 +97,14 @@ public class MyViewModel(
 With a bit of our middleware and some events, you can get here:
 
 ```csharp
-public class MyViewModel(IMediator mediator) : IEventHandler<ConnectivityChangedEvent>, IEventHandler<AuthChangedEvent> {
+public partial class MyViewModel(IMediator mediator) : IEventHandler<ConnectivityChangedEvent>, IEventHandler<AuthChangedEvent> {
     // ...
     var myData = await mediator.Request(new GetDataRequest());
 
     // logging, exception handling, offline caching can all be bundle into one nice clean call without the need for coupling
 }
 
-public class GetDataRequestHandler : IRequestHandler<GetDataRequest, MyData> {
+public partial class GetDataRequestHandler : IRequestHandler<GetDataRequest, MyData> {
 
     [OfflineAvailable] // <= boom done
     public async Task<MyData> Handle(GetDataRequest request, CancellationToken cancellationToken) {
